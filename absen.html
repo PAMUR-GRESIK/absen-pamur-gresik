@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ABSEN PAMUR GRESIK</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+    color: #333;
+    padding: 20px;
+    max-width: 400px;
+    margin: auto;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  label, input, button {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+  }
+  input {
+    padding: 8px;
+    font-size: 16px;
+  }
+  button {
+    padding: 10px;
+    background-color: #2b7aee;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  button:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+  }
+  #status {
+    margin-top: 10px;
+    font-weight: bold;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>ABSEN PAMUR GRESIK</h1>
+
+<label for="nama">Nama:</label>
+<input type="text" id="nama" placeholder="Masukkan nama" />
+
+<button id="submitBtn">Absen & Ambil Lokasi</button>
+
+<div id="status"></div>
+
+<button id="downloadBtn" disabled>Download CSV</button>
+
+<script>
+  const submitBtn = document.getElementById('submitBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const status = document.getElementById('status');
+  const namaInput = document.getElementById('nama');
+
+  // Array untuk menyimpan data absensi
+  let absensiData = [];
+
+  function toCSV(data) {
+    const header = ['Nama', 'Tanggal & Waktu', 'Latitude', 'Longitude'];
+    const rows = data.map(row =>
+      [row.nama, row.tanggal, row.lat, row.lon].map(field => `"${field}"`).join(',')
+    );
+    return [header.join(','), ...rows].join('\n');
+  }
+
+  function downloadCSV(filename, csv) {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (navigator.msSaveBlob) { // for IE 10+
+      navigator.msSaveBlob(blob, filename);
+    } else {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+
+  submitBtn.addEventListener('click', () => {
+    const nama = namaInput.value.trim();
+    if (!nama) {
+      status.textContent = 'Nama harus diisi!';
+      return;
+    }
+    if (!navigator.geolocation) {
+      status.textContent = 'Geolocation tidak didukung oleh browser Anda.';
+      return;
+    }
+    status.textContent = 'Mengambil lokasi...';
+
+    navigator.geolocation.getCurrentPosition(position => {
+      const { latitude, longitude } = position.coords;
+      const now = new Date();
+      const tanggal = now.toLocaleString();
+
+      absensiData.push({
+        nama: nama,
+        tanggal: tanggal,
+        lat: latitude.toFixed(6),
+        lon: longitude.toFixed(6),
+      });
+
+      status.textContent = `Absensi tercatat: ${nama} pada ${tanggal}`;
+      downloadBtn.disabled = false;
+      namaInput.value = '';
+    }, error => {
+      status.textContent = 'Gagal mendapatkan lokasi: ' + error.message;
+    });
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    if (absensiData.length === 0) {
+      status.textContent = 'Data absensi kosong!';
+      return;
+    }
+    const csv = toCSV(absensiData);
+    downloadCSV('absensi_pamur_gresik.csv', csv);
+  });
+</script>
+
+</body>
+</html>
