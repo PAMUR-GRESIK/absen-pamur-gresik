@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absensi Online - PAMUR GRESIK</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg">
+    <!-- Header Section -->
+    <header class="text-white py-6 px-4">
+        <div class="container mx-auto">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-2xl">
+                        <i class="fas fa-building text-purple-700 text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">PAMUR GRESIK</h1>
+                        <p class="text-sm opacity-90">Sistem Absensi Digital</p>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="text-right">
+                        <div id="current-date" class="text-lg font-semibold"></div>
+                        <div id="current-time" class="text-2xl font-bold"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="grid md:grid-cols-2 gap-8 items-start">
+            <!-- Left Side - Form -->
+            <div class="glass-effect rounded-2xl p-8 shadow-2xl">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">Form Absensi</h2>
+                
+                <form id="absensiForm" class="space-y-6">
+                    <div>
+                        <label class="block text-white text-sm font-medium mb-2" for="nama">
+                            <i class="fas fa-user mr-2"></i>Nama Lengkap
+                        </label>
+                        <input 
+                            type="text" 
+                            id="nama" 
+                            required 
+                            class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all"
+                            placeholder="Masukkan nama lengkap Anda"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-white text-sm font-medium mb-2" for="tanggal">
+                            <i class="fas fa-calendar mr-2"></i>Tanggal
+                        </label>
+                        <input 
+                            type="date" 
+                            id="tanggal" 
+                            required 
+                            class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all"
+                        >
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-white text-sm font-medium mb-2">
+                                <i class="fas fa-clock mr-2"></i>Waktu Datang
+                            </label>
+                            <div id="waktu-datang-display" class="px-4 py-3 bg-white/10 rounded-lg text-white text-center font-mono text-lg">
+                                --:--:--
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-white text-sm font-medium mb-2">
+                                <i class="fas fa-clock mr-2"></i>Waktu Pulang
+                            </label>
+                            <div id="waktu-pulang-display" class="px-4 py-3 bg-white/10 rounded-lg text-white text-center font-mono text-lg">
+                                --:--:--
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button 
+                            type="button" 
+                            id="btn-masuk" 
+                            class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 pulse-animation"
+                            onclick="absen('masuk')"
+                        >
+                            <i class="fas fa-sign-in-alt mr-2"></i>ABSEN MASUK
+                        </button>
+                        
+                        <button 
+                            type="button" 
+                            id="btn-pulang" 
+                            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 mt-4"
+                            onclick="absen('pulang')"
+                        >
+                            <i class="fas fa-sign-out-alt mr-2"></i>ABSEN PULANG
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Side - Information -->
+            <div class="space-y-6">
+                <!-- Status Card -->
+                <div class="glass-effect rounded-2xl p-6 text-white">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>Status Absensi Hari Ini
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span>Absen Masuk:</span>
+                            <span id="status-masuk" class="font-semibold text-yellow-300">Belum</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>Absen Pulang:</span>
+                            <span id="status-pulang" class="font-semibold text-yellow-300">Belum</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions Card -->
+                <div class="glass-effect rounded-2xl p-6 text-white">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-book mr-2"></i>Petunjuk Penggunaan
+                    </h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                            <span>Isi nama lengkap dengan benar</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                            <span>Pastikan tanggal sesuai dengan hari ini</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                            <span style="outline: rgb(0, 0, 0) dotted 3px; outline-offset: 1px;">Klik "Absen Masuk" saat datang latihan</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-400 mt-1 mr-2"></i>
+                            <span style="outline: rgb(0, 0, 0) dotted 3px; outline-offset: 1px;">Klik "Absen Pulang" saat pulang latihan</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Statistics Card -->
+                <div class="glass-effect rounded-2xl p-6 text-white">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-chart-bar mr-2"></i>Statistik Hari Ini
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div class="bg-white/10 rounded-lg p-3">
+                            <div class="text-2xl font-bold text-green-400">0</div>
+                            <div class="text-xs">Sudah Masuk</div>
+                        </div>
+                        <div class="bg-white/10 rounded-lg p-3">
+                            <div class="text-2xl font-bold text-blue-400">0</div>
+                            <div class="text-xs">Sudah Pulang</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-white text-center py-6 mt-12">
+        <div class="container mx-auto px-4">
+            <p class="text-sm opacity-80">
+                &copy; PAMUR GRESIK - Sistem Absensi Digital. All rights reserved.
+            </p>
+            <p class="text-xs opacity-60 mt-2">
+                Developed with <i class="fas fa-heart text-red-400"></i> for better attendance management
+            </p>
+        </div>
+    </footer>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-4 right-4 glass-effect rounded-lg p-4 text-white shadow-2xl transform translate-x-full transition-transform duration-300">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle text-green-400 mr-2"></i>
+            <span id="toast-message">Absensi berhasil disimpan!</span>
+        </div>
+    </div>
+
+    <script>
+        // Konfigurasi Google Apps Script
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbztk92r_FoCsB5Vny9BgAxKohMAdpRMdQr6W5EG6QvUlH-KH7zSG7sD7k_33-ejItHi/exec';
+
+        // Update waktu real-time
+        function updateWaktu() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            
+            document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', options);
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('id-ID');
+            
+            setTimeout(updateWaktu, 1000);
+        }
+
+        // Format waktu untuk display
+        function formatWaktu(date) {
+            return date.toLocaleTimeString('id-ID');
+        }
+
+        // Tampilkan notifikasi
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = toast.querySelector('i');
+            
+            toastMessage.textContent = message;
+            
+            if (isSuccess) {
+                toastIcon.className = 'fas fa-check-circle text-green-400 mr-2';
+            } else {
+                toastIcon.className = 'fas fa-exclamation-circle text-red-400 mr-2';
+            }
+            
+            toast.classList.remove('translate-x-full');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+            }, 3000);
+        }
+
+        // Fungsi absensi
+        function absen(jenis) {
+            const nama = document.getElementById('nama').value.trim();
+            const tanggal = document.getElementById('tanggal').value;
+            
+            if (!nama) {
+                showToast('Harap isi nama lengkap terlebih dahulu!', false);
+                return;
+            }
+            
+            if (!tanggal) {
+                showToast('Harap pilih tanggal terlebih dahulu!', false);
+                return;
+            }
+            
+            const sekarang = new Date();
+            const waktu = formatWaktu(sekarang);
+            
+            // Update display waktu
+            if (jenis === 'masuk') {
+                document.getElementById('waktu-datang-display').textContent = waktu;
+                document.getElementById('status-masuk').textContent = 'Sudah';
+                document.getElementById('status-masuk').className = 'font-semibold text-green-400';
+            } else {
+                document.getElementById('waktu-pulang-display').textContent = waktu;
+                document.getElementById('status-pulang').textContent = 'Sudah';
+                document.getElementById('status-pulang').className = 'font-semibold text-green-400';
+            }
+            
+            // Siapkan data untuk dikirim
+            const data = {
+                nama: nama,
+                tanggal: tanggal,
+                waktu_datang: jenis === 'masuk' ? waktu : '',
+                waktu_pulang: jenis === 'pulang' ? waktu : '',
+                jenis: jenis
+            };
+            
+            // Kirim data ke Google Spreadsheet
+            simpanKeSpreadsheet(data);
+        }
+
+        // Fungsi untuk menyimpan ke spreadsheet
+        function simpanKeSpreadsheet(data) {
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                showToast(`Absensi ${data.jenis} berhasil disimpan!`);
+                
+                // Reset form jika sudah absen pulang
+                if (data.jenis === 'pulang') {
+                    setTimeout(() => {
+                        document.getElementById('absensiForm').reset();
+                        document.getElementById('waktu-datang-display').textContent = '--:--:--';
+                        document.getElementById('waktu-pulang-display').textContent = '--:--:--';
+                        document.getElementById('status-masuk').textContent = 'Belum';
+                        document.getElementById('status-pulang').textContent = 'Belum';
+                        document.getElementById('status-masuk').className = 'font-semibold text-yellow-300';
+                        document.getElementById('status-pulang').className = 'font-semibold text-yellow-300';
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Terjadi kesalahan saat menyimpan data!', false);
+            });
+        }
+
+        // Inisialisasi
+        document.addEventListener('DOMContentLoaded', function() {
+            updateWaktu();
+            
+            // Set tanggal default ke hari ini
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tanggal').value = today;
+            
+            // Add floating animation to some elements
+            const floatingElements = document.querySelectorAll('.glass-effect');
+            floatingElements.forEach((el, index) => {
+                el.classList.add('floating');
+                el.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
+    </script>
+</body>
+</html>
